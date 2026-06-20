@@ -1,0 +1,2 @@
+name: shared-hello
+description: A minimal cross-CLI skill example. Use when the user wants a friendly greeting or a sanity check that skills are synced.
