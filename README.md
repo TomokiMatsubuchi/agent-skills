@@ -46,6 +46,24 @@ python3 scripts/sync.py --apply
 agy plugin install ~/.gemini/antigravity-cli/plugins/agent-skills
 ```
 
+## 同期内容の検証
+
+`SKILL.md` や symlink が壊れていないか、展開後に検証できます。
+
+```bash
+# 既存の target について、空でないことを確認
+python3 scripts/sync.py --verify
+
+# すべてのCLI target が存在することも要求（まだインストールしていないCLIがある場合はFAILします）
+python3 scripts/sync.py --verify-strict
+```
+
+検証では以下を確認します。
+
+- マスター側の `skills/<skill>/SKILL.md` が空（または空白のみ）でないこと
+- 各CLIの `SKILL.md` が存在し、空（または空白のみ）でないこと
+- target が symlink の場合、リンク先が壊れていないこと
+
 ## 対応CLIと展開先
 
 | CLI | 展開方法 | 展開先（macOS環境） |
