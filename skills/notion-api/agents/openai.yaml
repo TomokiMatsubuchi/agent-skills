@@ -1,0 +1,4 @@
+interface:
+  display_name: "Notion API"
+  short_description: "NotionのページとデータソースをAPI経由で安全に操作"
+  default_prompt: "Use $notion-api to search, read, create, or update content in Notion."

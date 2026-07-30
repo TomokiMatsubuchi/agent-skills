@@ -1,6 +1,6 @@
 # Agent Skills（マスターリポジトリ）
 
-このディレクトリは、Codex・Claude Code・Grok・Droid・Anti-Gravity CLI など複数のAIコーディングCLIで共通して使えるスキルの**唯一の情報源（Single Source of Truth）**です。
+このディレクトリは、Codex・Claude Code・Cursor・Grok・Droid・Anti-Gravity CLI など複数のAIコーディングCLIで共通して使えるスキルの**唯一の情報源（Single Source of Truth）**です。
 
 ## コンセプト
 
@@ -70,6 +70,7 @@ python3 scripts/sync.py --verify-strict
 |---|---|---|
 | Codex | `skills/<skill>` を個別 symlink | `~/.codex/skills/<skill>` |
 | Claude Code | `skills/<skill>` を個別 symlink | `~/.claude/skills/<skill>` |
+| Cursor | `skills/<skill>` を個別 symlink | `~/.cursor/skills/<skill>` |
 | Grok | `skills/<skill>` を個別 symlink | `~/.grok/skills/<skill>` |
 | Droid | `skills/<skill>` を個別 symlink | `~/.factory/skills/<skill>` |
 | Anti-Gravity CLI | `skills/<skill>` を plugin source / runtime 両方へ個別 symlink | `~/.gemini/antigravity-cli/plugins/agent-skills/skills/<skill>` と `~/.gemini/config/plugins/agent-skills/skills/<skill>` |
@@ -78,7 +79,7 @@ python3 scripts/sync.py --verify-strict
 
 - 原則として各スキルディレクトリを個別にシンボリックリンクするため、既存のCLI固有スキル（Codex の `.system/` など）はそのまま保持されます。
 - 既存の同名スキルがある場合、デフォルトでは上書きしません。上書きする場合は `--force` を付けてください。
-- マスター側の `skills/<skill>/` を編集すると、リンク先の Codex / Claude / Grok / Droid / Anti-Gravity CLI source に即時反映されます。
+- マスター側の `skills/<skill>/` を編集すると、リンク先の Codex / Claude / Cursor / Grok / Droid / Anti-Gravity CLI source に即時反映されます。
 - Anti-Gravity CLI は `agy plugin install` 時に runtime ディレクトリへコピーされます。`scripts/sync.py` は source と runtime の両方を symlink で維持するため、マスター更新が即座に反映されます。
 - Droid の `.factory/droids/` にある `.md` ファイルは「droid サブエージェント定義」であり、skills とは別物です。skills は `.factory/skills/` へ展開します。
 

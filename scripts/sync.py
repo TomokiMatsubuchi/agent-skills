@@ -3,6 +3,7 @@
 
 - Codex:  ~/.codex/skills/<skill>
 - Claude: ~/.claude/skills/<skill>
+- Cursor: ~/.cursor/skills/<skill>
 - Grok:   ~/.grok/skills/<skill>
 - Droid:  ~/.factory/skills/<skill>
 - Anti-Gravity CLI:
@@ -25,6 +26,7 @@ SKILLS_DIR = MASTER / "skills"
 CLI_TARGETS = {
     "codex": Path.home() / ".codex" / "skills",
     "claude": Path.home() / ".claude" / "skills",
+    "cursor": Path.home() / ".cursor" / "skills",
     "grok": Path.home() / ".grok" / "skills",
     "droid": Path.home() / ".factory" / "skills",
 }
@@ -176,11 +178,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--force", action="store_true", help="Replace existing skills or symlinks.")
     parser.add_argument("--verify", action="store_true", help="Verify source and target SKILL.md files are non-empty.")
     parser.add_argument("--verify-strict", action="store_true", help="Like --verify, but fail if any expected target is missing.")
-    parser.add_argument("--only", type=str, help="Comma-separated CLI list (codex,claude,grok,antigravity,droid).")
+    parser.add_argument("--only", type=str, help="Comma-separated CLI list (codex,claude,cursor,grok,antigravity,droid).")
     args = parser.parse_args(argv)
 
-    selected = args.only.split(",") if args.only else ["codex", "claude", "grok", "antigravity", "droid"]
-    valid = {"codex", "claude", "grok", "antigravity", "droid"}
+    selected = args.only.split(",") if args.only else ["codex", "claude", "cursor", "grok", "antigravity", "droid"]
+    valid = {"codex", "claude", "cursor", "grok", "antigravity", "droid"}
     unknown = set(selected) - valid
     if unknown:
         print(f"Unknown CLI(s): {', '.join(sorted(unknown))}", file=sys.stderr)
