@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jira Readonly"
+  short_description: "Jira課題をREST API経由で安全に取得・検索"
+  default_prompt: "Use $jira-readonly to retrieve or search Jira issues without making changes."
