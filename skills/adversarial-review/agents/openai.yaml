@@ -1,0 +1,4 @@
+interface:
+  display_name: "Adversarial Review"
+  short_description: "3つの最新AIモデルで独立した敵対的レビューを実行"
+  default_prompt: "Use $adversarial-review to run an independent three-model adversarial review and verify the findings."

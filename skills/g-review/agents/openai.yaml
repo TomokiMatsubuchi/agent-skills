@@ -1,0 +1,6 @@
+interface:
+  display_name: "G Review"
+  short_description: "Review local changes or GitHub pull requests"
+  default_prompt: "Use $g-review to review the current changes and report actionable findings."
+policy:
+  allow_implicit_invocation: false
