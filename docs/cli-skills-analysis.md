@@ -1,6 +1,6 @@
 # 各CLIの SKILLS 設定分析
 
-本ドキュメントは、Codex / Claude Code / Cursor / Grok / Droid / Anti-Gravity CLI のスキル設定を実際のファイルシステムと CLI の非対話実行から調査した結果です。
+本ドキュメントは、Codex / Claude Code / Cursor / Pi / Grok / Droid / Anti-Gravity CLI のスキル設定を実際のファイルシステムと CLI の非対話実行から調査した結果です。
 
 ## 調査環境
 
@@ -15,6 +15,7 @@
 | **Codex** | `~/.codex/skills/<skill>/SKILL.md` | Markdown + YAML frontmatter | `name`, `description`, 任意 `metadata` | `scripts/`, `references/`, `assets/`, `agents/openai.yaml` | システムスキルは `.system/` 配下 |
 | **Claude Code** | `~/.claude/skills/<skill>/SKILL.md` | Markdown + YAML frontmatter | `name`, `description`, 任意 `metadata` | `scripts/`, `references/` | シンプルな1ディレクトリ構成 |
 | **Cursor** | `~/.cursor/skills/<skill>/SKILL.md` | Markdown + YAML frontmatter | `name`, `description` | `scripts/`, `references/`, `assets/` | `~/.cursor/skills-cursor/` はCursor管理の組み込みスキル用 |
+| **Pi** | `~/.pi/agent/skills/<skill>/SKILL.md` | Markdown + YAML frontmatter | `name`, `description` | `scripts/`, `references/`, `assets/` | `~/.pi/agent/skills` は別ディレクトリへの symlink でも可 |
 | **Grok** | `~/.grok/skills/<skill>/SKILL.md` | Markdown + YAML frontmatter | `name`, `description`, 任意 `metadata.short-description` | `scripts/`, `references/` | bundled skills も同じ形式 |
 | **Droid** | `~/.factory/skills/<skill>/SKILL.md` | Markdown + YAML frontmatter | `name`, `description` | `scripts/`, `references/` | **skills** は `.factory/skills/` 配下（`.factory/droids/` は droid サブエージェント用） |
 | **Anti-Gravity CLI** | `~/.gemini/config/plugins/<plugin>/skills/<skill>/SKILL.md`（runtime） | Markdown + YAML frontmatter | `name`, `description` | `plugin.json` でグルーピング | import 後は `~/.gemini/config/plugins/` が実際の読み込み元 |
@@ -74,7 +75,16 @@
 - **形式**: サブディレクトリ + `SKILL.md`。Cursor IDEとCursor CLIの個人スキル共通パス。
 - **注意**: `~/.cursor/skills-cursor/` はCursorが管理する組み込みスキル用のため、同期先にはしない。
 
-### 4. Grok
+### 4. Pi
+
+- **場所**: `~/.pi/agent/skills/`
+- **形式**: サブディレクトリ + `SKILL.md`。Pi はこの配下を再帰的に探索する。
+- **展開上の注意**:
+  - `skills/<skill>/` を `~/.pi/agent/skills/<skill>/` へ個別にシンボリックリンクする。
+  - `~/.pi/agent/skills` 自体が設定リポジトリへリンクされていても、リンク先に各スキルリンクが作成される。
+  - 反映後、起動中の Pi では `/reload` を実行するか再起動する。
+
+### 5. Grok
 
 - **場所**: `~/.grok/skills/`（ユーザースキル）, `~/.grok/bundled/skills/`（同梱スキル）
 - **形式**: サブディレクトリ + `SKILL.md`。
@@ -90,7 +100,7 @@
   ```
 - **備考**: `grok` CLI は存在し、`grok-ollama` ランチャー経由で `~/.grok/skills/` のスキルが読み込まれる。`fork_secondary_model = "grok-build"` の設定は、Ollama Cloud 上に同名モデルが存在しない場合 404 を出すが、メインの応答には影響しない。`--no-subagents` を付けるとフォーク試行を抑制できる。
 
-### 5. Droid
+### 6. Droid
 
 - **場所**: `~/.factory/skills/`
 - **形式**: サブディレクトリ + `SKILL.md`。
@@ -108,7 +118,7 @@
   - `skills/<skill>/` を `~/.factory/skills/<skill>/` へ個別にシンボリックリンクする。
   - `~/.factory/droids/<skill>.md` へのコピーは不要。
 
-### 6. Anti-Gravity CLI
+### 7. Anti-Gravity CLI
 
 - **source プラグイン**: `~/.gemini/antigravity-cli/plugins/agent-skills/skills/<skill>/SKILL.md`
 - **runtime プラグイン**: `~/.gemini/config/plugins/agent-skills/skills/<skill>/SKILL.md`（import 後に実際に読まれる）
@@ -128,7 +138,7 @@
 
 ## 共通化のための結論
 
-1. **共通分母は `SKILL.md` + YAML frontmatter（`name`, `description`）**。これは Codex / Claude / Cursor / Grok / Droid / Anti-Gravity でほぼ同じ。
+1. **共通分母は `SKILL.md` + YAML frontmatter（`name`, `description`）**。これは Codex / Claude / Cursor / Pi / Grok / Droid / Anti-Gravity でほぼ同じ。
 2. **Droid もディレクトリ形式の skills をサポート**する。`.factory/droids/` は別物（droid サブエージェント）なので、`.factory/skills/` へ symlink する。
 3. **Codex の `agents/openai.yaml` や Anti-Gravity の `plugin.json`** は、他のCLIでは無視されるため、同じスキルディレクトリ内に共存させても問題ない。
 4. **Anti-Gravity CLI は source と runtime の2箇所**にスキルディレクトリが存在する。`agy plugin install` で runtime へコピーされた後、両方を symlink でマスターに繋ぐ。

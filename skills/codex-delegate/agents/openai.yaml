@@ -1,4 +1,0 @@
-interface:
-  display_name: "Codex Delegate"
-  short_description: "Delegate execution and independent review to Codex"
-  default_prompt: "Use $codex-delegate to plan here, delegate execution to Codex, and integrate the verified result."

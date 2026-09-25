@@ -1,0 +1,4 @@
+interface:
+  display_name: "gogcli"
+  short_description: "gogcli for Google Sheets/Drive CLI"
+  default_prompt: "Use $gogcli to read a Google Sheet and return data as JSON."
