@@ -7,6 +7,14 @@ description: Use the official Notion REST API to search, read, create, and updat
 
 Use `scripts/notion.sh` for authenticated requests. It uses API version `2026-03-11` by default and requires `NOTION_API_KEY`; never print or persist the token.
 
+## Comment permissions
+
+Reading page content does not grant access to comments. When reviewing requirements or decisions recorded in comments, also require the connection's **Read comments** capability.
+
+- Ask the user to open `https://app.notion.com/developers/connections`, select the connection associated with `NOTION_API_KEY`, and enable **Read comments** in its capabilities. Keep the target page shared with the connection.
+- Editing this skill or setting `NOTION_API_KEY` does not grant the capability. Do not claim that permissions have changed until a comment request succeeds.
+- If a comment request returns `403`, report that comments could not be read and ask the user to check the capability and page access. Do not interpret the failure as an empty comment list or conclude that a requirement lacks an approved decision.
+
 ## Workflow
 
 1. Check that `NOTION_API_KEY` is set. If it is missing, ask the user to create a Notion connection, share the target page or database with it, and export the token locally.
@@ -34,6 +42,13 @@ For JSON bodies with shell-sensitive content, put the body in a temporary file a
 - Append blocks with `PATCH /v1/blocks/{block_id}/children`.
 - Create a page with `POST /v1/pages`. Use a `page_id` parent for a normal child page or a `data_source_id` parent for a data-source entry.
 - When creating an entry, use property names and value shapes returned by `GET /v1/data_sources/{data_source_id}`.
+
+## Reading comments
+
+- When reviewing a requirement, read relevant comment threads as well as the page body before reporting omissions or contradictions.
+- Use `scripts/notion.sh GET '/v1/comments?block_id=PAGE_OR_BLOCK_ID&page_size=100'` and follow `has_more` / `next_cursor`.
+- Page-level comments and comments on child blocks are separate. For a discussion link, use the URL fragment as the block ID and match the returned comments by `discussion_id` using the `d` query parameter.
+- The public API lists unresolved comments only. An empty response does not prove that no resolved discussion exists; report this limitation and request the relevant discussion text when needed.
 
 ## Guardrails
 
