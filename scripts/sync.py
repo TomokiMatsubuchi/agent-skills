@@ -24,6 +24,12 @@ from pathlib import Path
 MASTER = Path(__file__).resolve().parent.parent
 SKILLS_DIR = MASTER / "skills"
 
+# Cursor keeps plugin skills in a content-addressed cache. pstack skills are
+# vendored into this repository as real directories (scripts/vendor-pstack.sh)
+# so a clone works on any machine; --prefer-live lets this Mac use the newest
+# cache content instead, before the next vendoring run.
+PSTACK_CACHE_ROOT = Path.home() / ".cursor" / "plugins" / "cache" / "cursor-public" / "pstack"
+
 CLI_TARGETS = {
     "codex": Path.home() / ".codex" / "skills",
     "claude": Path.home() / ".claude" / "skills",
@@ -47,6 +53,34 @@ def discover_skills() -> list[Path]:
     if not SKILLS_DIR.is_dir():
         return []
     return [p for p in sorted(SKILLS_DIR.iterdir()) if p.is_dir() and (p / "SKILL.md").is_file()]
+
+
+def live_cache_skills() -> dict[str, Path]:
+    """Map skill name -> directory in the newest pstack cache (empty without one)."""
+    if not PSTACK_CACHE_ROOT.is_dir():
+        return {}
+    versions = [p for p in PSTACK_CACHE_ROOT.iterdir() if (p / "skills").is_dir()]
+    if not versions:
+        return {}
+    newest = max(versions, key=lambda p: p.stat().st_mtime)
+    skills_dir = newest / "skills"
+    return {
+        p.name: p
+        for p in sorted(skills_dir.iterdir())
+        if p.is_dir() and (p / "SKILL.md").is_file()
+    }
+
+
+def prefer_live_skills(skill_dirs: list[Path]) -> list[Path]:
+    """Replace vendored skill dirs with the live cache copy when one exists."""
+    live = live_cache_skills()
+    if not live:
+        print(f"  --prefer-live: no pstack cache at {PSTACK_CACHE_ROOT}; using the repository copies")
+        return skill_dirs
+    resolved = [live.get(d.name, d) for d in skill_dirs]
+    swapped = sum(1 for before, after in zip(skill_dirs, resolved) if before != after)
+    print(f"  --prefer-live: {swapped} skill(s) taken from {live[next(iter(live))].parent.parent}")
+    return resolved
 
 
 def skill_targets(skill_dir: Path) -> list[tuple[str, Path]]:
@@ -181,6 +215,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--verify", action="store_true", help="Verify source and target SKILL.md files are non-empty.")
     parser.add_argument("--verify-strict", action="store_true", help="Like --verify, but fail if any expected target is missing.")
     parser.add_argument("--only", type=str, help="Comma-separated CLI list (codex,claude,cursor,pi,grok,antigravity,droid).")
+    parser.add_argument(
+        "--prefer-live",
+        action="store_true",
+        help="Link the newest Cursor pstack cache copy of a skill when one exists (Mac-side overlay; the repository keeps the vendored copy for other machines).",
+    )
     args = parser.parse_args(argv)
 
     selected = args.only.split(",") if args.only else ["codex", "claude", "cursor", "pi", "grok", "antigravity", "droid"]
@@ -194,6 +233,9 @@ def main(argv: list[str] | None = None) -> int:
     if not skill_dirs:
         print(f"No skills found in {SKILLS_DIR}")
         return 0
+
+    if args.prefer_live:
+        skill_dirs = prefer_live_skills(skill_dirs)
 
     if args.verify or args.verify_strict:
         if not verify_skills(skill_dirs, strict=args.verify_strict):
