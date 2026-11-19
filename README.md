@@ -46,6 +46,34 @@ python3 scripts/sync.py --apply
 agy plugin install ~/.gemini/antigravity-cli/plugins/agent-skills
 ```
 
+## pstack スキル（Cursor プラグイン由来）の扱い
+
+Cursor の pstack プラグイン由来のスキルは、以前は
+`~/.cursor/plugins/cache/cursor-public/pstack/<hash>/skills/<name>` への symlink として
+リポジトリに入っていました。このパスはプラグイン更新のたびに変わり、キャッシュは
+Cursor を動かしているマシンにしか無いため、clone しただけでは解決できません（VM では全滅）。
+
+そのため実ディレクトリとしてリポジトリに取り込んでいます。2つのマシンでの役割分担は次のとおりです。
+
+| マシン | 使うもの | 更新方法 |
+|---|---|---|
+| Cursor のある Mac | 既定は取り込んだコピー。`--prefer-live` を付けると最新キャッシュ | `git pull`、必要なら再取り込みして push |
+| Cursor の無いマシン（bobbin の VM など） | 取り込んだコピー | `git pull` だけ |
+
+```bash
+# pstack を更新したら、最新キャッシュの内容を取り込み直す（Mac で実行）
+scripts/vendor-pstack.sh            # dry-run
+scripts/vendor-pstack.sh --apply    # 実ディレクトリへコピー
+
+git add -A skills && git commit -m "chore: vendor pstack skills" && git push
+
+# 取り込み前でも、Mac だけは常に最新を使いたい場合
+python3 scripts/sync.py --apply --prefer-live
+```
+
+`--prefer-live` は、キャッシュに同名スキルがあればキャッシュ側を、無ければリポジトリのコピーを
+各 CLI へリンクします。既定は off なので、取り込んだコピーがそのまま使われます。
+
 ## 同期内容の検証
 
 `SKILL.md` や symlink が壊れていないか、展開後に検証できます。
